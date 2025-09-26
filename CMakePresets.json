@@ -1,0 +1,43 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 19
+  },
+  "configurePresets": [
+    {
+      "name": "arm64-release",
+      "displayName": "ARM64 Release (Cross)",
+      "generator": "Ninja",
+      "toolchainFile": "${sourceDir}/toolchain-arm64.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      },
+      "binaryDir": "${sourceDir}/build/arm64-release"
+    },
+    {
+      "name": "arm64-debug",
+      "displayName": "ARM64 Debug (Cross)",
+      "generator": "Ninja",
+      "toolchainFile": "${sourceDir}/toolchain-arm64.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      },
+      "binaryDir": "${sourceDir}/build/arm64-release"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "arm64-release",
+      "configurePreset": "arm64-release",
+      "jobs": 0
+    },
+    {
+      "name": "arm64-debug",
+      "configurePreset": "arm64-debug",
+      "jobs": 0
+    }
+  ]
+}
