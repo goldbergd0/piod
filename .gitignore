@@ -1,4 +1,5 @@
 build
+export/*
 
 # Prerequisites
 *.d
