@@ -15,6 +15,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/export)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/export)
 
 add_subdirectory(audio_processing)
+add_subdirectory(cmn)
 add_subdirectory(app)
 
 
