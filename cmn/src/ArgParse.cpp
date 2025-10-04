@@ -18,10 +18,23 @@ std::string ArgParse::getValue(const std::string& a_option) const {
 void ArgParse::on(const std::string& a_option, const std::function<void(const std::string&)>& a_callback, bool a_required, const std::string& a_help) {
     m_callbacks[a_option] = a_callback;
     if (a_required) {
-        m_required.insert(a_option);
+        m_required.insert({a_option});
     }
     if (!a_help.empty()) {
         m_help_texts[a_option] = a_help;
+    }
+}
+
+void ArgParse::on(const std::vector<std::string>& a_option, const std::function<void(const std::string&)>& a_callback, bool a_required, const std::string& a_help) {
+    for (const auto& opt : a_option) {
+        m_callbacks[opt] = a_callback;
+        if (!a_help.empty()) {
+            m_help_texts[opt] = a_help;
+        }
+    }
+    
+    if (a_required) {
+        m_required.insert(a_option);
     }
 }
 
@@ -78,20 +91,45 @@ void ArgParse::parse(int argc, char* argv[]) {
             }
         }
     }
-
+    auto found = false;
+    auto bad = false;
     for (const auto& req : m_required) {
-        if (m_options.find(req) == m_options.end()) {
-            this->printHelp();
-            throw std::runtime_error("Required option missing: " + req);
+        found = false;
+        for (const auto& r : req) {
+            if (m_options.find(r) != m_options.end()) {
+                found = true;
+                break;
+            }
         }
+        if (!found) {
+            this->printHelp();
+            std::string str_req;
+            for (const auto& r : req) {
+                str_req += r + ", ";
+            }
+            if (!str_req.empty()) {
+                str_req = str_req.substr(0, str_req.length() - 2); // Remove trailing comma and space
+            }
+            std::cerr << "Required option missing: " << str_req << std::endl;
+            bad = true;
+        }
+    }
+    if (bad) {
+        throw std::runtime_error("Missing required options");
     }
 }
 
 void ArgParse::printHelp() const {
     std::cout << "Available options:\n";
+    std::set<std::string> reqs;
+    for (const auto& req : m_required) {
+        for (const auto& r : req) {
+            reqs.insert(r);
+        }
+    }
     for (const auto& [option, help] : m_help_texts) {
         std::cout << "  --" << option;
-        if (m_required.find(option) != m_required.end()) {
+        if (reqs.find(option) != reqs.end()) {
             std::cout << " (required)";
         }
         std::cout << ": " << help << "\n";

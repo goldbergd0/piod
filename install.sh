@@ -1,0 +1,1 @@
+sudo apt install -y libspdlog-dev libasound2 libfftw3-single3
