@@ -32,14 +32,16 @@
 		"dockerfile": "Dockerfile"
 	},
 	"runArgs": [
-		"--memory=2g", // Limit memory to 2GB
-		"--memory-swap=2g" // Limit swap memory to 2GB (optional, defaults to memory limit if not specified)
+		"--memory=4g" // Limit memory to 2GB
+		// "--memory-swap=2g" // Limit swap memory to 2GB (optional, defaults to memory limit if not specified)
 	],
 	"customizations": {
 		"vscode": {
 		"extensions": [
 			"ms-vscode.cmake-tools",
-			"ms-vscode.cpptools" // Recommended: C/C++ extension for IntelliSense and debugging
+			"ms-vscode.cpptools", // Recommended: C/C++ extension for IntelliSense and debugging
+			"-github.copilot",
+            "-github.copilot-chat"
 		]
 		}
 	},

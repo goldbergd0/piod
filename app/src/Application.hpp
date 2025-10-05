@@ -1,11 +1,15 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <thread>
+#include <chrono>
+
 
 #include <audio_processing.h>
 #include <ArgParse.h>
 #include "spdlog/spdlog.h"
 #include <iomanip>
+#include <Usb.h>
 
 class Application {
 public:
@@ -30,11 +34,15 @@ public:
                 case 3: spdlog::set_level(spdlog::level::debug); break;
             }
         }, false, "Enable verbose logging");
+        parser.on("size", [this](const std::string& value) {
+            this->sz = std::stoi(value);
+            std::cout << "Size option value: " << this->sz << std::endl;
+        }, false, "An example size option");
         parser.parse(argc, argv);
     }
 
 
-    void test(std::vector<float>& input) {
+    void testfft(std::vector<float>& input) {
         std::vector<float> output;
         if (audio_processing::fft(input, output) == 0) {
             spdlog::info("FFT output size: {}", output.size());
@@ -59,28 +67,76 @@ public:
         std::cout << std::endl;
     }
 
-    void run(int argc, char* argv[]) {
-        this->handleArgs(argc, argv);
-        spdlog::info("Application is running...");
-        audio_processing::listen("hw:0,0", [](const std::vector<int16_t>& data) {
-            // Example callback processing
-            spdlog::debug("Received audio data of size: {}", data.size());
+    void listen_test() {
+        std::atomic_bool stop_flag(false);
+        std::thread listener_thread([&stop_flag]() {
+            audio_processing::listen("hw:0,0", [](const std::vector<int16_t>& data) {
+                spdlog::debug("Captured {} samples", data.size());
+            }, 44100, 1, 1024, 10, stop_flag);
         });
 
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+        stop_flag = true;
+        if (listener_thread.joinable()) {
+            listener_thread.join();
+        }
+    }
+
+    void fft_test() {
         std::vector<float> input(10, 0); // Example input
         std::cout<< std::setw(3);
         input[0] = 1.0f; // Impulse signal
-        test(input);
+        testfft(input);
         for (size_t x = 0; x < input.size(); ++x) {
             input[x] = static_cast<float>(sin(x));
         }
-        test(input);
+        testfft(input);
         for (size_t x = 0; x < input.size(); ++x) {
             input[x] = 10;
         }
-        test(input);
+        testfft(input);
+    }
 
+    void usb_led_test(){
+        // libusb_example();
+        open_usb();
+        int num_led = this->sz * 3;
+        int sz = num_led + 1;
+        // CANT SEND DATA SMALLER THAN 7 BYTES
+        if (sz < 8) sz = 8;
+        std::vector<uint8_t> data(sz, 0); // Default size 4 if not set
+        data[0] = 42;
+        int in = -1;
+        while (true) {
+            std::cout << "R (0-255): ";
+            std::cin >> in;
+            for (int i = 1; i < sz; i+=3) data[i] = static_cast<uint8_t>(in);
+            // data[1] = static_cast<uint8_t>(in);
+            std::cout << "G (0-255): ";
+            std::cin >> in;
+            // data[2] = static_cast<uint8_t>(in);
+            for (int i = 2; i < sz; i+=3) data[i] = static_cast<uint8_t>(in);
+            std::cout << "B (0-255): ";
+            std::cin >> in;
+            for (int i = 3; i < sz; i+=3) data[i] = static_cast<uint8_t>(in);
+            // data[3] = static_cast<uint8_t>(in);
+            // std::cout << "Writing: " << (int)data[0] << " " << (int)data[1] << " " << (int)data[2] << std::endl;
+            std::cout << "Writing: ";
+            for (const auto& byte : data) {
+                std::cout << (int)byte << " ";
+            }
+            std::cout << std::endl;
+            write_usb(data);
+            // std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+        cleanup_usb();
         std::cout << std::endl;
+    }
+
+    void run(int argc, char* argv[]) {
+        this->handleArgs(argc, argv);
+        spdlog::info("Application is running...");
+        usb_led_test();
     }
 
     void waitForExit() {
@@ -89,5 +145,6 @@ public:
     }
 
 public:
-     ArgParse parser;    
+     ArgParse parser;
+     int sz = 0;
 };

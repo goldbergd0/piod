@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y \
     libasound2-dev \
     libspdlog-dev \
     libfftw3-dev \
+    libusb-1.0-0-dev \
  && rm -rf /var/lib/apt/lists/*
 
 # FROM arm64v8/ubuntu:latest AS depends

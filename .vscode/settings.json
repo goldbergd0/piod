@@ -55,6 +55,8 @@
         "semaphore": "cpp",
         "sstream": "cpp",
         "stop_token": "cpp",
-        "thread": "cpp"
-    }
+        "thread": "cpp",
+        "iomanip": "cpp"
+    },
+    "C_Cpp.default.compilerPath": "/usr/bin/gcc"
 }

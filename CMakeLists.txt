@@ -15,6 +15,7 @@ find_package(fmt REQUIRED)
 target_link_libraries(spdlog::spdlog INTERFACE fmt::fmt)
 # find_package(FFTW3 REQUIRED COMPONENTS single)
 find_library(FFTW3F_LIBRARY NAMES fftw3f)
+pkg_check_modules(LIBUSB REQUIRED libusb-1.0)
 
 # Output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/export)
