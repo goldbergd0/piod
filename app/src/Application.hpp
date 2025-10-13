@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -10,6 +12,8 @@
 #include "spdlog/spdlog.h"
 #include <iomanip>
 #include <Usb.h>
+
+uint8_t HEADER_BYTE = 42;
 
 class Application {
 public:
@@ -35,9 +39,9 @@ public:
             }
         }, false, "Enable verbose logging");
         parser.on("size", [this](const std::string& value) {
-            this->sz = std::stoi(value);
-            std::cout << "Size option value: " << this->sz << std::endl;
-        }, false, "An example size option");
+            this->m_sz = std::stoi(value);
+            std::cout << "Size option value: " << this->m_sz << std::endl;
+        }, true, "An example size option");
         parser.parse(argc, argv);
     }
 
@@ -97,17 +101,17 @@ public:
         testfft(input);
     }
 
-    void usb_led_test(){
+    void usb_led_test(Usb& usb_interface){
         // libusb_example();
-        open_usb();
-        int num_led = this->sz * 3;
+        int num_led = this->m_sz * 3;
         int sz = num_led + 1;
         // CANT SEND DATA SMALLER THAN 7 BYTES
         if (sz < 8) sz = 8;
         std::vector<uint8_t> data(sz, 0); // Default size 4 if not set
-        data[0] = 42;
+        data[0] = HEADER_BYTE;
         int in = -1;
-        while (true) {
+        bool stop = false;
+        while (!stop) {
             std::cout << "R (0-255): ";
             std::cin >> in;
             for (int i = 1; i < sz; i+=3) data[i] = static_cast<uint8_t>(in);
@@ -126,17 +130,19 @@ public:
                 std::cout << (int)byte << " ";
             }
             std::cout << std::endl;
-            write_usb(data);
-            // std::this_thread::sleep_for(std::chrono::seconds(1));
+            usb_interface.write_and_reopen(data);
+            std::cout << "Continue? (1=yes, 0=no): ";
+            stop = !((std::cin >> in) && in == 1);
         }
-        cleanup_usb();
         std::cout << std::endl;
     }
 
     void run(int argc, char* argv[]) {
         this->handleArgs(argc, argv);
         spdlog::info("Application is running...");
-        usb_led_test();
+        Usb u;
+        u.open();
+        usb_led_test(u);
     }
 
     void waitForExit() {
@@ -146,5 +152,5 @@ public:
 
 public:
      ArgParse parser;
-     int sz = 0;
+     int m_sz = 0;
 };

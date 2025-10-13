@@ -1,6 +1,7 @@
 add_library(cmn SHARED
     src/ArgParse.cpp
     src/cmn.cpp
+    src/Usb.cpp
 )
 
 target_include_directories(cmn

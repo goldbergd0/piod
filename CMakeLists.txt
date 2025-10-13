@@ -17,6 +17,8 @@ target_link_libraries(spdlog::spdlog INTERFACE fmt::fmt)
 find_library(FFTW3F_LIBRARY NAMES fftw3f)
 pkg_check_modules(LIBUSB REQUIRED libusb-1.0)
 
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+
 # Output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/export)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/export)
