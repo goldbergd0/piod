@@ -2,6 +2,7 @@ add_library(cmn SHARED
     src/ArgParse.cpp
     src/cmn.cpp
     src/Usb.cpp
+    src/GridData.cpp
 )
 
 target_include_directories(cmn

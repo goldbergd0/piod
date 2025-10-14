@@ -1,19 +1,23 @@
 #pragma once
 
-#include <iostream>
-#include <vector>
-#include <string>
-#include <thread>
-#include <chrono>
-
-
 #include <audio_processing.h>
 #include <ArgParse.h>
 #include "spdlog/spdlog.h"
 #include <iomanip>
 #include <Usb.h>
+#include <AudioDrawer.h>
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <thread>
+#include <chrono>
+#include <cstdint>
+#include <cstddef>
+
 
 uint8_t HEADER_BYTE = 42;
+using namespace std::literals::chrono_literals;
 
 class Application {
 public:
@@ -41,7 +45,7 @@ public:
         parser.on("size", [this](const std::string& value) {
             this->m_sz = std::stoi(value);
             std::cout << "Size option value: " << this->m_sz << std::endl;
-        }, true, "An example size option");
+        }, false, "An example size option");
         parser.parse(argc, argv);
     }
 
@@ -79,7 +83,7 @@ public:
             }, 44100, 1, 1024, 10, stop_flag);
         });
 
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::this_thread::sleep_for(5s);
         stop_flag = true;
         if (listener_thread.joinable()) {
             listener_thread.join();
@@ -137,12 +141,38 @@ public:
         std::cout << std::endl;
     }
 
+    void resample_test() {
+        std::vector<float> input{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        std::vector<float> output(5, 0.0f);
+        std::vector<float> output2(15, 0.0f);
+        audio_processing::resample(input, output);
+        std::cout << "Input: ";
+        for (const auto& val : input) {
+            std::cout << val << " ";
+        }
+        std::cout << std::endl;
+        std::cout << "Output: ";
+        for (const auto& val : output) {
+            std::cout << val << " ";
+        }
+        std::cout << std::endl;
+        audio_processing::resample(output, output2);
+        std::cout << "Output2: ";
+        for (const auto& val : output2) {
+            std::cout << val << " ";
+        }
+        std::cout << std::endl;
+    }
+
     void run(int argc, char* argv[]) {
         this->handleArgs(argc, argv);
         spdlog::info("Application is running...");
-        Usb u;
-        u.open();
-        usb_led_test(u);
+        // Usb u;
+        // u.open();
+        // usb_led_test(u);
+        // resample_test();
+        drawer.start();
+
     }
 
     void waitForExit() {
@@ -151,6 +181,7 @@ public:
     }
 
 public:
-     ArgParse parser;
-     int m_sz = 0;
+    ArgParse parser;
+    int m_sz = 0;
+    AudioDrawer drawer;
 };

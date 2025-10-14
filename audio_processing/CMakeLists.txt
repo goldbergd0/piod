@@ -1,5 +1,8 @@
 add_library(audio_processing SHARED
     src/audio_processing.cpp
+    src/AudioListener.cpp
+    src/AudioProcess.cpp
+    src/AudioDrawer.cpp
 )
 
 

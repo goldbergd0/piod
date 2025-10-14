@@ -1,13 +1,12 @@
 #include <Usb.h>
 
+#include <libusb-1.0/libusb.h>
+#include "spdlog/spdlog.h"
+#include <fmt/core.h>
+
 #include <iostream>
 #include <string>
 #include <string_view>
-
-#include <libusb-1.0/libusb.h>
-#include "spdlog/spdlog.h"
- 
-#include <fmt/core.h>
 
 template <> struct fmt::formatter<libusb_device_descriptor> {
     // A simple formatter that doesn't parse any format specs.
