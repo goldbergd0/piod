@@ -6,7 +6,7 @@ struct Rgb {
     uint8_t g = 0;
     uint8_t b = 0;
 };
-void HSVtoRGB(float H, float S,float V){
+Rgb HSVtoRGB(float H, float S,float V){
     float s = S/100;
     float v = V/100;
     float C = s*v;
