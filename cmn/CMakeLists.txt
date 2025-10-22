@@ -3,6 +3,7 @@ add_library(cmn SHARED
     src/cmn.cpp
     src/Usb.cpp
     src/GridData.cpp
+    src/GridComponent.cpp
 )
 
 target_include_directories(cmn

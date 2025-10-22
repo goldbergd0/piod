@@ -54,11 +54,4 @@ void AudioDrawer::draw() {
 
 void AudioDrawer::update(const AudioProcess *process) {
     spdlog::debug("GOT UPDATE, WRITING DATA");
-    for (size_t x = 0; x < m_grid.width(); ++x) {
-        for (size_t y = 0; y < m_grid.height(); ++y) {
-            auto cur = m_grid.get(x, y);
-            m_grid.set(x, y, std::get<0>(cur) + 1, std::get<1>(cur) + 1, std::get<2>(cur) + 1);
-            spdlog::debug("({}, {}): ({}, {}, {})", x, y, std::get<0>(cur), std::get<1>(cur), std::get<2>(cur));
-        }
-    }
 }
