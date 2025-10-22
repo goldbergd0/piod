@@ -16,10 +16,10 @@ typedef struct _snd_pcm_hw_params snd_pcm_hw_params_t;
 class AudioListener {
 public:
     AudioListener(const std::string& device_name = "hw:0,0", uint32_t sample_rate = 44100, uint32_t samples_per_frame = 1024, uint32_t num_channels = 2):
-        m_device_name(device_name),
         m_sample_rate(sample_rate),
         m_samples_per_frame(samples_per_frame),
-        m_num_channels(num_channels) {}
+        m_num_channels(num_channels),
+        m_device_name(device_name) {}
     ~AudioListener();
     void set_sample_rate(uint32_t rate) { m_sample_rate = rate; }
     void set_samples_per_frame(uint32_t spf) { m_samples_per_frame = spf; }
@@ -33,8 +33,6 @@ public:
         int duration_seconds = 10);
     void stop();
     void block_until_stopped();
-    
-
 
 private:
     std::atomic_bool m_stop_flag = true;
@@ -44,7 +42,6 @@ private:
     uint32_t m_sample_rate = 44100;
     uint32_t m_samples_per_frame = 1024;
     uint32_t m_num_channels = 2;
-    uint32_t m_time_period = 0;
-    std::string m_device_name = "hw:0,0";
+    std::string m_device_name;
 
 };

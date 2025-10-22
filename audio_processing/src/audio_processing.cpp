@@ -51,7 +51,7 @@ int audio_processing::listen(const std::string& device_name, const std::function
     // Write the parameters to the driver
     rc = snd_pcm_hw_params(handle, params);
     if (rc < 0) {
-        std::cerr << "unable to set hw parameters: " << snd_strerror(rc) << std::endl;
+        spdlog::error("unable to set hw parameters: {}", snd_strerror(rc));
         return -1;
     }
 

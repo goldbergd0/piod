@@ -7,7 +7,7 @@
   "configurePresets": [
     {
       "name": "arm64-release",
-      "displayName": "ARM64 Release (Cross)",
+      "displayName": "ARM64 Release",
       "generator": "Ninja",
       "toolchainFile": "${sourceDir}/toolchain-arm64.cmake",
       "cacheVariables": {
@@ -18,7 +18,7 @@
     },
     {
       "name": "arm64-debug",
-      "displayName": "ARM64 Debug (Cross)",
+      "displayName": "ARM64 Debug",
       "generator": "Ninja",
       "toolchainFile": "${sourceDir}/toolchain-arm64.cmake",
       "cacheVariables": {

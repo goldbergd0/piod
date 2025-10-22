@@ -6,6 +6,25 @@
 
 using tp = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
+void AudioProcess::stop() {
+    m_stop = true;
+    if (m_processing_thread.joinable()) {
+        m_cond_var.notify_all();
+        m_processing_thread.join();
+        m_processing_thread = std::thread();
+    }
+    m_listener.stop();
+}
+
+void AudioProcess::start() {
+    m_stop = false;
+    m_listener.listen([this](const std::vector<int16_t>& audio_data,
+            const std::chrono::time_point<std::chrono::high_resolution_clock>& timestamp,
+            const uint64_t& frame_num) {
+        this->queue_data(audio_data, timestamp, frame_num);
+    }, 0); // 0 duration means run indefinitely until stopped
+}
+
 void AudioProcess::queue_data(const std::vector<int16_t>& audio_data,
             const tp& timestamp,
             const uint64_t& frame_num) {
@@ -25,15 +44,15 @@ void AudioProcess::queue_data(const std::vector<int16_t>& audio_data,
     std::get<uint64_t>(load) = frame_num;
     if (!m_processing_thread.joinable() && !m_stop) {
         m_processing_thread = std::thread([this]() {
-            while (!this->m_stop) {
-                std::unique_lock<std::mutex> lock(this->m_mutex);
-                this->m_cond_var.wait(lock, [this]() {
-                    return this->m_load_buffer_index != this->m_buffer_index || this->m_stop;
+            while (!m_stop) {
+                std::unique_lock<std::mutex> lock(m_mutex);
+                m_cond_var.wait(lock, [this]() {
+                    return m_load_buffer_index != m_buffer_index || m_stop;
                 });
-                this->m_buffer_index = this->m_load_buffer_index;
-                auto& data = this->m_audio_buffer[this->m_buffer_index];
+                m_buffer_index = m_load_buffer_index;
+                auto& data = m_audio_buffer[m_buffer_index];
                 lock.unlock();
-                this->process(std::get<std::vector<int16_t> >(data), std::get<tp>(data), std::get<uint64_t>(data));
+                process(std::get<std::vector<int16_t> >(data), std::get<tp>(data), std::get<uint64_t>(data));
             }
         });
         // NOTE: could be a small race condition here if the thread takes a while to startup...
@@ -94,6 +113,7 @@ void AudioProcess::compute_fft(const std::vector<int16_t>& audio_data) {
         final_buffer.resize(m_fft_bins, 0.0f);
     }
     audio_processing::resample(fft_out_buffer, final_buffer);
+    m_fft = &final_buffer;
     spdlog::debug("FFT computed: {}", final_buffer.size());
     // Units of the bins of the DFT are: 
     //   freq = i * sample_rate / N
